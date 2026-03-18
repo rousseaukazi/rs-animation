@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RS · Loading Animation Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -266,6 +268,23 @@
       <span class="chip active">scrolling</span>
       <span class="chip active">glow</span>
       <span class="chip active">pulse spike</span>
+    </div>
+  </div>
+
+  <!-- ─── V10: Cursive "squiggling" wave ─── -->
+  <div class="card">
+    <span class="card-label">V10 · Cursive wave · standalone (no label)</span>
+    <div class="card-pill-wrap">
+      <!-- Pill has no text label — the animation IS the word -->
+      <div class="pill">
+        <canvas id="v10" style="display:block;height:22px;" width="440" height="44"></canvas>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="chip active">cursive stroke</span>
+      <span class="chip active">draw-in L→R</span>
+      <span class="chip active">per-char bounce</span>
+      <span class="chip active">no label needed</span>
     </div>
   </div>
 
@@ -590,6 +609,85 @@ window.addEventListener('load', () => {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+})();
+
+// ─── V10: Cursive "squiggling" wave ──────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('v10');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;  // 440×44 (2x retina)
+  const FONT_SIZE = 28; // rendered at 2x
+  const FONT = `${FONT_SIZE}px "Dancing Script"`;
+  const TEXT = 'squiggling';
+  const DRAW_IN_MS = 900;
+  const WAVE_MS = 520;
+  const BREATH_MS = 580;
+  const AMP_BASE = 2.5;
+
+  let startTime = null;
+  let animating = false;
+
+  function loop(now) {
+    if (!animating) return;
+    if (!startTime) startTime = now;
+    const elapsed = now - startTime;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = FONT;
+
+    // Measure total text width
+    const totalW = ctx.measureText(TEXT).width;
+    const originX = (W - totalW) / 2;
+    const baseY = H / 2 + FONT_SIZE * 0.38; // rough cursive baseline
+
+    // Draw-in progress (easeOut cubic)
+    const rawDraw = Math.min(1, elapsed / DRAW_IN_MS);
+    const drawProg = 1 - Math.pow(1 - rawDraw, 3);
+    const clipWidth = originX + totalW * drawProg;
+
+    // Amplitude: flat during draw-in, breathes after
+    const amp = elapsed < DRAW_IN_MS
+      ? AMP_BASE
+      : AMP_BASE * (1 + 0.45 * (0.5 - 0.5 * Math.cos(((elapsed - DRAW_IN_MS) / BREATH_MS) * Math.PI * 2)));
+
+    const phase = elapsed / WAVE_MS;
+
+    // Clip to drawn portion
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, clipWidth, H);
+    ctx.clip();
+
+    ctx.strokeStyle = '#DB1919';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Draw each character with its own bounce phase
+    let curX = originX;
+    for (let i = 0; i < TEXT.length; i++) {
+      const ch = TEXT[i];
+      const cw = ctx.measureText(ch).width;
+      // Phase offset: later chars lag slightly, creating a ripple left→right
+      const charPhase = phase - i * 0.09;
+      const bounceY = amp * Math.sin(charPhase * Math.PI * 2) * 2; // ×2 for retina
+
+      ctx.save();
+      ctx.translate(curX, baseY + bounceY);
+      ctx.strokeText(ch, 0, 0);
+      ctx.restore();
+
+      curX += cw;
+    }
+
+    ctx.restore();
+    requestAnimationFrame(loop);
+  }
+
+  document.fonts.load(FONT).then(() => {
+    animating = true;
+    requestAnimationFrame(loop);
+  });
 })();
 
 // ─── V9: RS shimmer scan ──────────────────────────────────────────────────────
