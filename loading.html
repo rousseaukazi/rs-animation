@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RS · Loading Animation Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a1a;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  .sub {
+    text-align: center;
+    font-size: 11px;
+    color: #3a3a3a;
+    margin-bottom: 56px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Frosted pill — mimics the actual macOS panel */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(40,40,40,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 100px;
+    border: 0.5px solid rgba(255,255,255,0.12);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .pill-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: -0.01em;
+  }
+
+  /* Canvas container — exactly 48×14pt like the app */
+  .anim-slot {
+    width: 48px;
+    height: 14px;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* Grid of variants */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #111;
+    border-radius: 14px;
+    border: 1px solid #222;
+    padding: 32px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #444;
+    align-self: flex-start;
+  }
+  .card-pill-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #2a2a2a, #1e1e1e);
+    border-radius: 10px;
+  }
+
+  /* Variant controls */
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .chip {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid #333;
+    color: #555;
+    background: transparent;
+    cursor: default;
+    letter-spacing: 0.05em;
+  }
+  .chip.active { border-color: #DB1919; color: #DB1919; }
+
+  /* SVG variants */
+  svg.anim-slot { overflow: visible; }
+</style>
+</head>
+<body>
+
+<h1>RS · Loading Animation Lab</h1>
+<p class="sub">Design iterations for the "Squiggling…" loading state — 48×14pt canvas, same as the app</p>
+
+<div class="grid">
+
+  <!-- ─── V1: Current — sine wave draw-in + breathe ─── -->
+  <div class="card">
+    <span class="card-label">V1 · Current (sine wave)</span>
+    <div class="card-pill-wrap">
+      <div class="pill">
+        <canvas id="v1" class="anim-slot" width="96" height="28"></canvas>
+        <span class="pill-label">Squiggling…</span>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="chip active">draw-in 0.2s</span>
+      <span class="chip active">amplitude breathe</span>
+      <span class="chip active">loop</span>
+    </div>
+  </div>
+
+  <!-- ─── V2: RS path mini — trace outline only, looping ─── -->
+  <div class="card">
+    <span class="card-label">V2 · RS logo trace (outline loop)</span>
+    <div class="card-pill-wrap">
+      <div class="pill">
+        <svg id="v2" class="anim-slot" viewBox="-10 -10 2356 960" fill="none">
+          <path id="v2-path"
+            stroke="#DB1919" stroke-width="80" stroke-linecap="round" fill="none"
+            d="M1610.44 0.34603C1662.7 -1.37538 1699.34 3.79067 1706.35 5.63509C1765.61 16.0867 1805.7 73.6331 1795.25 132.9C1789.96 153.803 1781.35 172.981 1767.34 186.875C1763.89 190.318 1762.17 192.167 1760.33 193.888C1748.15 207.782 1727.25 237.411 1749.88 275.775C1770.78 308.851 1791.68 340.206 1812.58 364.675C1824.76 378.57 1835.21 392.588 1847.38 408.203C1852.67 415.212 1887.47 453.579 1950.18 439.562C2018.18 422.102 2101.79 385.46 2122.69 314.02C2138.43 254.753 2197.69 221.675 2255.12 237.29C2314.38 253.029 2347.46 312.295 2331.84 371.562L2332.21 371.442C2290.41 524.773 2156.14 606.784 2028.87 645.148C2028.87 645.148 1983.5 655.599 1962.6 678.224C1943.42 697.406 1939.97 718.309 1938.25 721.752C1905.18 852.459 1800.54 939.64 1664.54 939.64C1519.82 939.64 1418.74 868.2 1385.67 742.658C1385.67 740.936 1385.67 737.366 1383.95 735.645C1382.22 723.471 1364.76 613.669 1437.92 516.039C1458.83 489.849 1483.3 467.227 1511.08 448.045C1512.81 448.045 1516.37 446.32 1518.09 444.599C1523.38 441.156 1526.83 437.591 1531.99 435.869C1539 430.705 1544.16 423.7 1549.45 414.97C1575.64 373.164 1563.35 289.425 1500.64 277.252C1495.35 275.531 1490.18 275.529 1484.9 275.529C1441.37 275.529 1411.73 299.878 1392.55 324.347C1357.76 380.171 1342.02 444.601 1338.58 458.618C1338.58 460.309 1338.57 461.998 1336.94 463.805L1310.76 604.943C1309.53 610.439 1308.19 615.889 1306.74 621.288C1260.66 798.637 1124.36 913.571 956.783 913.571C953.368 913.571 949.991 913.416 946.659 913.117C941.394 913.339 936.109 913.453 930.808 913.453C751.286 913.453 603.121 793.194 557.749 629.288C550.741 606.665 543.855 594.369 542.01 592.647C536.723 585.638 528.114 580.475 519.384 578.753H510.654C477.578 577.032 461.838 606.666 458.396 622.282C454.953 631.012 451.386 646.628 447.943 655.358C395.685 813.976 266.7 913.327 109.803 913.327C48.8145 913.327 0 864.51 0 803.522C7.30951e-05 742.534 48.8145 695.446 109.803 695.446C207.433 695.446 240.51 601.38 249.24 559.451L275.43 421.733C277.151 414.724 278.874 405.994 280.719 397.387C294.613 320.66 315.517 207.414 400.975 111.505C503.769 -3.58502 665.952 5.14637 699.029 8.71224C868.1 17.4424 953.556 120.237 977.902 214.424C998.805 294.594 981.347 378.206 936.098 444.482C934.376 446.203 930.807 449.643 927.364 456.652C923.922 458.373 922.08 461.943 920.358 463.664L918.635 465.381C890.723 495.015 850.638 517.645 833.178 526.375C833.178 528.097 831.458 528.092 831.458 528.092H829.735C828.014 529.814 826.291 529.817 822.726 531.538C813.995 536.703 803.544 545.433 794.813 559.451C791.371 564.738 758.173 634.454 861.091 679.703C864.533 681.425 868.1 683.15 871.543 683.15C889.003 691.88 909.904 695.32 930.808 695.32C1005.67 695.32 1075.5 638.892 1095.07 564.876C1095.49 563.074 1095.87 561.344 1096.22 559.695L1122.41 427.266V422.097C1136.3 347.091 1172.95 247.741 1237.5 165.85C1268.85 127.486 1349.02 47.3149 1490.18 14.2386C1491.9 14.2386 1495.47 12.5219 1498.91 12.5218H1500.64C1537.28 3.79165 1570.35 0.34603 1598.27 0.34603H1610.44Z"/>
+        </svg>
+        <span class="pill-label">Squiggling…</span>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="chip active">RS path</span>
+      <span class="chip active">trace loop</span>
+      <span class="chip active">no fill</span>
+    </div>
+  </div>
+
+  <!-- ─── V3: Dash traveler — dashes orbiting the RS path ─── -->
+  <div class="card">
+    <span class="card-label">V3 · Dash traveler (comet on path)</span>
+    <div class="card-pill-wrap">
+      <div class="pill">
+        <svg id="v3" class="anim-slot" viewBox="-10 -10 2356 960" fill="none">
+          <path id="v3-path"
+            stroke="#DB1919" stroke-width="80" stroke-linecap="round" fill="none"
+            opacity="0.15"
+            d="M1610.44 0.34603C1662.7 -1.37538 1699.34 3.79067 1706.35 5.63509C1765.61 16.0867 1805.7 73.6331 1795.25 132.9C1789.96 153.803 1781.35 172.981 1767.34 186.875C1763.89 190.318 1762.17 192.167 1760.33 193.888C1748.15 207.782 1727.25 237.411 1749.88 275.775C1770.78 308.851 1791.68 340.206 1812.58 364.675C1824.76 378.57 1835.21 392.588 1847.38 408.203C1852.67 415.212 1887.47 453.579 1950.18 439.562C2018.18 422.102 2101.79 385.46 2122.69 314.02C2138.43 254.753 2197.69 221.675 2255.12 237.29C2314.38 253.029 2347.46 312.295 2331.84 371.562L2332.21 371.442C2290.41 524.773 2156.14 606.784 2028.87 645.148C2028.87 645.148 1983.5 655.599 1962.6 678.224C1943.42 697.406 1939.97 718.309 1938.25 721.752C1905.18 852.459 1800.54 939.64 1664.54 939.64C1519.82 939.64 1418.74 868.2 1385.67 742.658C1385.67 740.936 1385.67 737.366 1383.95 735.645C1382.22 723.471 1364.76 613.669 1437.92 516.039C1458.83 489.849 1483.3 467.227 1511.08 448.045C1512.81 448.045 1516.37 446.32 1518.09 444.599C1523.38 441.156 1526.83 437.591 1531.99 435.869C1539 430.705 1544.16 423.7 1549.45 414.97C1575.64 373.164 1563.35 289.425 1500.64 277.252C1495.35 275.531 1490.18 275.529 1484.9 275.529C1441.37 275.529 1411.73 299.878 1392.55 324.347C1357.76 380.171 1342.02 444.601 1338.58 458.618C1338.58 460.309 1338.57 461.998 1336.94 463.805L1310.76 604.943C1309.53 610.439 1308.19 615.889 1306.74 621.288C1260.66 798.637 1124.36 913.571 956.783 913.571C953.368 913.571 949.991 913.416 946.659 913.117C941.394 913.339 936.109 913.453 930.808 913.453C751.286 913.453 603.121 793.194 557.749 629.288C550.741 606.665 543.855 594.369 542.01 592.647C536.723 585.638 528.114 580.475 519.384 578.753H510.654C477.578 577.032 461.838 606.666 458.396 622.282C454.953 631.012 451.386 646.628 447.943 655.358C395.685 813.976 266.7 913.327 109.803 913.327C48.8145 913.327 0 864.51 0 803.522C7.30951e-05 742.534 48.8145 695.446 109.803 695.446C207.433 695.446 240.51 601.38 249.24 559.451L275.43 421.733C277.151 414.724 278.874 405.994 280.719 397.387C294.613 320.66 315.517 207.414 400.975 111.505C503.769 -3.58502 665.952 5.14637 699.029 8.71224C868.1 17.4424 953.556 120.237 977.902 214.424C998.805 294.594 981.347 378.206 936.098 444.482C934.376 446.203 930.807 449.643 927.364 456.652C923.922 458.373 922.08 461.943 920.358 463.664L918.635 465.381C890.723 495.015 850.638 517.645 833.178 526.375C833.178 528.097 831.458 528.092 831.458 528.092H829.735C828.014 529.814 826.291 529.817 822.726 531.538C813.995 536.703 803.544 545.433 794.813 559.451C791.371 564.738 758.173 634.454 861.091 679.703C864.533 681.425 868.1 683.15 871.543 683.15C889.003 691.88 909.904 695.32 930.808 695.32C1005.67 695.32 1075.5 638.892 1095.07 564.876C1095.49 563.074 1095.87 561.344 1096.22 559.695L1122.41 427.266V422.097C1136.3 347.091 1172.95 247.741 1237.5 165.85C1268.85 127.486 1349.02 47.3149 1490.18 14.2386C1491.9 14.2386 1495.47 12.5219 1498.91 12.5218H1500.64C1537.28 3.79165 1570.35 0.34603 1598.27 0.34603H1610.44Z"/>
+          <!-- Comet: a short dash traveling the path -->
+          <path id="v3-comet"
+            stroke="#DB1919" stroke-width="80" stroke-linecap="round" fill="none"
+            d="M1610.44 0.34603C1662.7 -1.37538 1699.34 3.79067 1706.35 5.63509C1765.61 16.0867 1805.7 73.6331 1795.25 132.9C1789.96 153.803 1781.35 172.981 1767.34 186.875C1763.89 190.318 1762.17 192.167 1760.33 193.888C1748.15 207.782 1727.25 237.411 1749.88 275.775C1770.78 308.851 1791.68 340.206 1812.58 364.675C1824.76 378.57 1835.21 392.588 1847.38 408.203C1852.67 415.212 1887.47 453.579 1950.18 439.562C2018.18 422.102 2101.79 385.46 2122.69 314.02C2138.43 254.753 2197.69 221.675 2255.12 237.29C2314.38 253.029 2347.46 312.295 2331.84 371.562L2332.21 371.442C2290.41 524.773 2156.14 606.784 2028.87 645.148C2028.87 645.148 1983.5 655.599 1962.6 678.224C1943.42 697.406 1939.97 718.309 1938.25 721.752C1905.18 852.459 1800.54 939.64 1664.54 939.64C1519.82 939.64 1418.74 868.2 1385.67 742.658C1385.67 740.936 1385.67 737.366 1383.95 735.645C1382.22 723.471 1364.76 613.669 1437.92 516.039C1458.83 489.849 1483.3 467.227 1511.08 448.045C1512.81 448.045 1516.37 446.32 1518.09 444.599C1523.38 441.156 1526.83 437.591 1531.99 435.869C1539 430.705 1544.16 423.7 1549.45 414.97C1575.64 373.164 1563.35 289.425 1500.64 277.252C1495.35 275.531 1490.18 275.529 1484.9 275.529C1441.37 275.529 1411.73 299.878 1392.55 324.347C1357.76 380.171 1342.02 444.601 1338.58 458.618C1338.58 460.309 1338.57 461.998 1336.94 463.805L1310.76 604.943C1309.53 610.439 1308.19 615.889 1306.74 621.288C1260.66 798.637 1124.36 913.571 956.783 913.571C953.368 913.571 949.991 913.416 946.659 913.117C941.394 913.339 936.109 913.453 930.808 913.453C751.286 913.453 603.121 793.194 557.749 629.288C550.741 606.665 543.855 594.369 542.01 592.647C536.723 585.638 528.114 580.475 519.384 578.753H510.654C477.578 577.032 461.838 606.666 458.396 622.282C454.953 631.012 451.386 646.628 447.943 655.358C395.685 813.976 266.7 913.327 109.803 913.327C48.8145 913.327 0 864.51 0 803.522C7.30951e-05 742.534 48.8145 695.446 109.803 695.446C207.433 695.446 240.51 601.38 249.24 559.451L275.43 421.733C277.151 414.724 278.874 405.994 280.719 397.387C294.613 320.66 315.517 207.414 400.975 111.505C503.769 -3.58502 665.952 5.14637 699.029 8.71224C868.1 17.4424 953.556 120.237 977.902 214.424C998.805 294.594 981.347 378.206 936.098 444.482C934.376 446.203 930.807 449.643 927.364 456.652C923.922 458.373 922.08 461.943 920.358 463.664L918.635 465.381C890.723 495.015 850.638 517.645 833.178 526.375C833.178 528.097 831.458 528.092 831.458 528.092H829.735C828.014 529.814 826.291 529.817 822.726 531.538C813.995 536.703 803.544 545.433 794.813 559.451C791.371 564.738 758.173 634.454 861.091 679.703C864.533 681.425 868.1 683.15 871.543 683.15C889.003 691.88 909.904 695.32 930.808 695.32C1005.67 695.32 1075.5 638.892 1095.07 564.876C1095.49 563.074 1095.87 561.344 1096.22 559.695L1122.41 427.266V422.097C1136.3 347.091 1172.95 247.741 1237.5 165.85C1268.85 127.486 1349.02 47.3149 1490.18 14.2386C1491.9 14.2386 1495.47 12.5219 1498.91 12.5218H1500.64C1537.28 3.79165 1570.35 0.34603 1598.27 0.34603H1610.44Z"/>
+        </svg>
+        <span class="pill-label">Squiggling…</span>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="chip active">ghost trail</span>
+      <span class="chip active">comet loop</span>
+    </div>
+  </div>
+
+  <!-- ─── V4: Pulse dots ─── -->
+  <div class="card">
+    <span class="card-label">V4 · Pulse dots</span>
+    <div class="card-pill-wrap">
+      <div class="pill">
+        <svg id="v4" class="anim-slot" viewBox="0 0 48 14" fill="none">
+          <circle id="d1" cx="8"  cy="7" r="2.5" fill="#DB1919"/>
+          <circle id="d2" cx="24" cy="7" r="2.5" fill="#DB1919"/>
+          <circle id="d3" cx="40" cy="7" r="2.5" fill="#DB1919"/>
+        </svg>
+        <span class="pill-label">Squiggling…</span>
+      </div>
+    </div>
+    <div class="controls">
+      <span class="chip active">staggered</span>
+      <span class="chip active">scale pulse</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── V1: Faithful clone of current app animation ─────────────────────────────
+(function() {
+  const canvas = document.getElementById('v1');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const startTime = performance.now();
+  const drawInMs = 200, waveCycleMs = 400, breathCycleMs = 500;
+  const RED = '#DB1919';
+
+  function frame(now) {
+    const elapsed = now - startTime;
+    ctx.clearRect(0, 0, W, H);
+
+    const rawDraw = Math.min(1, elapsed / drawInMs);
+    const drawProg = 1 - Math.pow(1 - rawDraw, 3);
+
+    const phase = elapsed / waveCycleMs;
+
+    let amp;
+    if (elapsed < drawInMs) {
+      amp = 3;
+    } else {
+      const breathPhase = (elapsed - drawInMs) / breathCycleMs;
+      amp = 3 * (1 + 0.4 * (0.5 - 0.5 * Math.cos(breathPhase * Math.PI * 2)));
+    }
+
+    const midY = H / 2;
+    const wavelength = 12;
+    const drawWidth = W * drawProg;
+
+    if (drawWidth <= 0) { requestAnimationFrame(frame); return; }
+
+    ctx.beginPath();
+    ctx.moveTo(0, midY + Math.sin(phase * Math.PI * 2) * amp);
+    for (let x = 1; x < drawWidth; x++) {
+      const y = midY + Math.sin((x / wavelength + phase) * Math.PI * 2) * amp;
+      ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = RED;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ─── V2: RS path trace loop ───────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const p2 = document.getElementById('v2-path');
+  const len = p2.getTotalLength();
+  const cometLen = len * 0.25;
+  p2.style.strokeDasharray = len;
+  p2.style.strokeDashoffset = len;
+
+  const tl2 = gsap.timeline({ repeat: -1, repeatDelay: 0.3 });
+  tl2.to(p2, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut' })
+     .to(p2, { strokeDashoffset: -len, duration: 1.6, ease: 'power2.inOut', delay: 0.3 })
+     .set(p2, { strokeDashoffset: len });
+
+// ─── V3: Comet traveler ────────────────────────────────────────────────────
+  const comet = document.getElementById('v3-comet');
+  const lenC = comet.getTotalLength();
+  const tail = lenC * 0.18;
+  comet.style.strokeDasharray = `${tail} ${lenC - tail}`;
+  comet.style.strokeDashoffset = 0;
+
+  gsap.to(comet, {
+    strokeDashoffset: -lenC,
+    duration: 2,
+    ease: 'none',
+    repeat: -1,
+  });
+});
+
+// ─── V4: Pulse dots ─────────────────────────────────────────────────────────
+['d1','d2','d3'].forEach((id, i) => {
+  const dot = document.getElementById(id);
+  gsap.to(dot, {
+    scale: 1.6,
+    opacity: 0.3,
+    duration: 0.5,
+    ease: 'sine.inOut',
+    repeat: -1,
+    yoyo: true,
+    delay: i * 0.18,
+    transformOrigin: 'center center',
+  });
+});
+</script>
+</body>
+</html>
