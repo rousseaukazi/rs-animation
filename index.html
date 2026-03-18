@@ -54,13 +54,14 @@ window.addEventListener('load', () => {
 
   // 1. Draw outer
   tl.to(outer, { strokeDashoffset: 0, duration: 2.2, ease: 'power2.inOut' })
-  // 2. Draw S counter
-    .to(sInner, { strokeDashoffset: 0, duration: 0.6, ease: 'power2.inOut' }, '-=0.1')
-  // 3. Draw R counter
-    .to(rInner, { strokeDashoffset: 0, duration: 0.6, ease: 'power2.inOut' }, '-=0.2')
-  // 4. Fill all in
-    .to(all, { fill: '#DB1919', duration: 0.5, ease: 'power1.in' }, '+=0.1')
-  // 5. Fade out and reset
+  // 2. Draw both counters simultaneously
+    .to(sInner, { strokeDashoffset: 0, duration: 0.65, ease: 'power2.inOut' }, '+=0.05')
+    .to(rInner, { strokeDashoffset: 0, duration: 0.65, ease: 'power2.inOut' }, '<')
+  // 3. Fill outer red, counters fill background (holes)
+    .to(outer,  { fill: '#DB1919', duration: 0.5, ease: 'power1.in' }, '+=0.1')
+    .to(sInner, { fill: '#0e0e0e', duration: 0.5, ease: 'power1.in' }, '<')
+    .to(rInner, { fill: '#0e0e0e', duration: 0.5, ease: 'power1.in' }, '<')
+  // 4. Fade out and reset
     .to(all, { opacity: 0, duration: 0.4, delay: 1 })
     .call(() => {
       all.forEach((p, i) => {
